@@ -1,7 +1,7 @@
 # Gender Prediction API
 
 ```
-git clone https://github.com/Nocturnailed-Community/gender-Prediction-API.git
+git clone https://github.com/Nocturnailed-Community/Serving-Gender-Prediction.git
 ```
 
 ## Install Library dependencies
