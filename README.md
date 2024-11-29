@@ -19,7 +19,7 @@ python-multipart
 pip install -r requirements.txt
 ```
 
-### Running the Server
+## Running the Server
 
 After setting up the environment, you can run the FastAPI server locally using Uvicorn.
 

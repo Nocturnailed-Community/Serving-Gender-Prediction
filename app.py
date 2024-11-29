@@ -5,10 +5,10 @@ os.environ["USE_TF"] = "0"
 os.environ["TRANSFORMERS_NO_TF_WARNING"] = "1"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Sembunyikan log error TensorFlow
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from transformers import AutoFeatureExtractor, AutoModelForImageClassification
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import torch
 import base64
 import io
@@ -35,6 +35,7 @@ model.to(device)
 
 # Standard size for images
 STANDARD_SIZE = (224, 224)  # Sesuaikan dengan input model Anda
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}  # Format gambar yang diperbolehkan
 
 # Route for checking if the model is running
 @app.get("/")
@@ -45,8 +46,22 @@ async def root():
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
     try:
+        # Check file extension
+        file_extension = file.filename.split(".")[-1].lower()
+        if file_extension not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file format: {file_extension}. Allowed formats: {', '.join(ALLOWED_EXTENSIONS)}."
+            )
+
         # Load image from uploaded file
-        image = Image.open(file.file)
+        try:
+            image = Image.open(file.file)
+        except UnidentifiedImageError:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded file is not a valid image."
+            )
 
         # Convert image to RGB mode if needed
         if image.mode != "RGB":
