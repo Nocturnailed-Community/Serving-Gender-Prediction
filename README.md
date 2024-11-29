@@ -19,6 +19,26 @@ python-multipart
 pip install -r requirements.txt
 ```
 
+### Running the Server
+
+After setting up the environment, you can run the FastAPI server locally using Uvicorn.
+
+1. **Start the server**:
+
+    Run the following command to start the FastAPI app on `http://127.0.0.1:8000`:
+
+    ```bash
+    uvicorn app:app --reload
+    ```
+
+    Alternatively, if you're using a different entry point for the FastAPI app:
+
+    ```bash
+    uvicorn main:app --reload
+    ```
+
+    This will reload the server automatically upon code changes.
+
 ## Deployment
 
 Instructions for running the model in docker

@@ -1,3 +1,10 @@
+import os
+
+# Paksa TensorFlow dinonaktifkan
+os.environ["USE_TF"] = "0"
+os.environ["TRANSFORMERS_NO_TF_WARNING"] = "1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Sembunyikan log error TensorFlow
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from transformers import AutoFeatureExtractor, AutoModelForImageClassification
@@ -21,14 +28,18 @@ app.add_middleware(
 # Load pretrained model and feature extractor
 extractor = AutoFeatureExtractor.from_pretrained("rizvandwiki/gender-classification")
 model = AutoModelForImageClassification.from_pretrained("rizvandwiki/gender-classification")
+
+# Ensure the model runs on the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
+
+# Standard size for images
+STANDARD_SIZE = (224, 224)  # Sesuaikan dengan input model Anda
 
 # Route for checking if the model is running
 @app.get("/")
 async def root():
     return {"message": "The model API is running successfully!"}
-
 
 # Define prediction endpoint
 @app.post("/predict/")
@@ -36,6 +47,13 @@ async def predict(file: UploadFile = File(...)):
     try:
         # Load image from uploaded file
         image = Image.open(file.file)
+
+        # Convert image to RGB mode if needed
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        # Resize image to standard size
+        image = image.resize(STANDARD_SIZE)
 
         # Preprocess image
         inputs = extractor(images=image, return_tensors="pt")
@@ -59,4 +77,7 @@ async def predict(file: UploadFile = File(...)):
         }
 
     except Exception as e:
+        # Debug error jika terkait TensorFlow
+        if "tensorflow" in str(e).lower():
+            return {"error": "TensorFlow conflict detected. Please ensure PyTorch is set as default backend."}
         return {"error": str(e)}
