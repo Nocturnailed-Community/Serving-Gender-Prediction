@@ -107,4 +107,7 @@ The Docker image for the gender prediction API is available on Docker Hub. You c
 docker pull ikhwan17/gender-prediction
 ```
 
-Link: https://hub.docker.com/r/ikhwan17/gender-prediction
+## Source
+
+- HuggingFace: https://huggingface.co/rizvandwiki/gender-classification
+- DockerHub: https://hub.docker.com/r/ikhwan17/gender-prediction
